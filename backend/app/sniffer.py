@@ -47,6 +47,7 @@ class PacketData:
     icmp_type: Optional[str] = None
     code: Optional[int] = None
 
+
 # Dictionary for ICMPv6 message types
 icmpv6_types = {
     1: "destination-unreachable",
@@ -68,6 +69,7 @@ icmpv6_types = {
     152: "multicast-listener-report",
     153: "multicast-listener-done",
 }
+
 
 # Function for dissecting packet fields
 def dissect_packet(packet, interface: str) -> PacketData:
@@ -170,6 +172,7 @@ def dissect_packet(packet, interface: str) -> PacketData:
         icmp_type=obj_icmp_type,
         code=obj_code
     )
+    
 
 # Function to store only desired packets
 def handle_packet(packet, interface: str, packet_lst: list):
@@ -180,8 +183,9 @@ def handle_packet(packet, interface: str, packet_lst: list):
     if ARP in packet or protocol_str in ["udp", "tcp", "icmp", "icmpv6"]:
         packet_lst.append(dissected_packet)
 
+
 # Function to sniff packets on an interface
-def start_sniffer(interface: str) -> list:
+def start_sniffer(interface: str) -> list[PacketData]:
     try:
         packet_lst = []
         sniff(
