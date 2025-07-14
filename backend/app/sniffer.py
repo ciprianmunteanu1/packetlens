@@ -7,14 +7,14 @@ from scapy.all import (
     ARP,
     IPv6,
     Raw,
-    ICMP,
+    ICMP
 )
 from scapy.layers.inet6 import (
     ICMPv6EchoRequest,
     ICMPv6EchoReply,
     ICMPv6ND_NS,
     ICMPv6ND_NA,
-    ICMPv6Unknown,
+    ICMPv6Unknown
 )
 from scapy.layers.inet import icmptypes
 from datetime import datetime
@@ -47,7 +47,7 @@ class PacketData:
     icmp_type: Optional[str] = None
     code: Optional[int] = None
 
-
+# Dictionary for ICMPv6 message types
 icmpv6_types = {
     1: "destination-unreachable",
     2: "packet-too-big",
@@ -69,7 +69,7 @@ icmpv6_types = {
     153: "multicast-listener-done",
 }
 
-
+# Function for dissecting packet fields
 def dissect_packet(packet, interface: str) -> PacketData:
     # PacketData object fields
     obj_timestamp = datetime.fromtimestamp(packet.time).strftime("%Y-%m-%d %H:%M:%S")
@@ -92,7 +92,7 @@ def dissect_packet(packet, interface: str) -> PacketData:
 
     obj_payload = None
 
-    # Ethernet Layer
+    # Check for Ethernet layer
     if Ether in packet:
         obj_src_mac = packet[Ether].src
         obj_dst_mac = packet[Ether].dst
@@ -101,7 +101,10 @@ def dissect_packet(packet, interface: str) -> PacketData:
         if ARP in packet:
             obj_src_ip = packet[ARP].psrc
             obj_dst_ip = packet[ARP].pdst
+            obj_src_mac = packet[ARP].hwsrc
+            obj_dst_mac = packet[ARP].hwdst
 
+    # Check if packet has IPv4 or IPv6 layer
     has_ip_layer = False
     if IP in packet:
         obj_src_ip = packet[IP].src
@@ -115,6 +118,7 @@ def dissect_packet(packet, interface: str) -> PacketData:
         obj_protocol = packet[IPv6].sprintf("%IPv6.nh%").lower()
         has_ip_layer = True
 
+    # Check for transport layer or ICMP / ICMPv6 layer
     if has_ip_layer:
         if TCP in packet:
             obj_src_port = packet[TCP].sport
@@ -142,12 +146,11 @@ def dissect_packet(packet, interface: str) -> PacketData:
 
             if icmpv6_layer:
                 icmp_type_num = icmpv6_layer.type
-                obj_icmp_type = icmpv6_types.get(
-                    icmp_type_num, str(icmp_type_num)
-                )
+                obj_icmp_type = icmpv6_types.get(icmp_type_num, str(icmp_type_num))
                 obj_code = icmpv6_layer.code
                 obj_protocol = "icmpv6"
 
+    # Check for payload
     if Raw in packet:
         obj_payload = packet[Raw].load
 
@@ -165,34 +168,30 @@ def dissect_packet(packet, interface: str) -> PacketData:
         flags=obj_flags,
         payload=obj_payload,
         icmp_type=obj_icmp_type,
-        code=obj_code,
+        code=obj_code
     )
 
-
-packet_lst = []
-
-
-def handle_packet(packet, interface: str):
+# Function to store only desired packets
+def handle_packet(packet, interface: str, packet_lst: list):
     dissected_packet = dissect_packet(packet, interface)
-
     protocol_str = dissected_packet.protocol
 
     # Selecting only protocols from this list or ARP
     if ARP in packet or protocol_str in ["udp", "tcp", "icmp", "icmpv6"]:
         packet_lst.append(dissected_packet)
-        print(dissected_packet)
 
-
-def start_sniffer(interface: str):
-    sniff(
-        count=20,
-        iface=interface,
-        prn=lambda pkt: handle_packet(pkt, interface),
-        store=False,
-        timeout = 10,
-        stop_filter=lambda x: len(packet_lst) == 20,
-    )
-
-
-if __name__ == "__main__":
-    start_sniffer("lo0")
+# Function to sniff packets on an interface
+def start_sniffer(interface: str) -> list:
+    try:
+        packet_lst = []
+        sniff(
+            iface=interface,
+            prn=lambda pkt: handle_packet(pkt, interface, packet_lst),
+            store=False,
+            timeout = 30,
+            stop_filter=lambda x: len(packet_lst) == 20
+        )
+        return packet_lst
+    except:
+        print(f"[Error] No permissions to sniff on interface: {interface}.")
+        return []

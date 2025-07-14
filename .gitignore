@@ -1,5 +1,5 @@
-backend/venv/
-bakcend/app/venv/
+backend/venv
+bakcend/app/venv
 __pycache__/
 .DS_Store
 .pytest_cache/
