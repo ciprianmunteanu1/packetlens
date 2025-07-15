@@ -1,10 +1,5 @@
-from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy import create_engine, Column, DateTime, Integer, String
-
-# Create database engine and Base class
-engine = create_engine("sqlite:///packets.db", echo=True)
-Base = declarative_base()
-
+from sqlalchemy import Column, DateTime, Integer, String
+from db_manager import Base
 
 class Packet(Base):
     __tablename__ = "packets"
@@ -50,8 +45,3 @@ class Packet(Base):
             "icmp_type": self.icmp_type,
             "code": self.code,
         }
-
-
-# Create table in database and session maker
-Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
