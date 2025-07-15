@@ -1,5 +1,6 @@
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import create_engine, Column, DateTime, Integer, String, func, and_, or_
+from sniffer import start_sniffer
 from threading_manager import collect_packets
 from datetime import datetime
 import json
@@ -61,8 +62,39 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 
 
+# Function to add packets captured on a specific interface to database
+def add_iface_packets_to_db(interface: str):
+    # Create session
+    session = Session()
+
+    # Add packets to database
+    packet_list = start_sniffer(interface)
+    for packet in packet_list:
+        session.add(
+            Packet(
+                timestamp=datetime.strptime(packet.timestamp, "%Y-%m-%d %H:%M:%S") if packet.timestamp else None,
+                src_mac=packet.src_mac,
+                dst_mac=packet.dst_mac,
+                eth_type=packet.eth_type,
+                interface=packet.interface,
+                protocol=packet.protocol,
+                src_ip=packet.src_ip,
+                dst_ip=packet.dst_ip,
+                src_port=packet.src_port,
+                dst_port=packet.dst_port,
+                flags=packet.flags,
+                payload=str(packet.payload) if packet.payload else None,
+                icmp_type=packet.icmp_type,
+                code=packet.code
+            )
+        )
+
+    session.commit()
+    session.close()
+
+
 # Function to add packets returned by all threads to database
-def add_packets_to_db():
+def add_all_packets_to_db():
     # Create session
     session = Session()
 
