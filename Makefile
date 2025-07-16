@@ -14,13 +14,13 @@ venv:
 	python3 -m venv .venv
 
 install:
-	. .venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt
+	. .venv/bin/activate && pip3 install --upgrade pip3 && pip3 install -r requirements.txt
 
 run:
 	. .venv/bin/activate && uvicorn backend.app.api.endpoints:app --reload
 
 test:
-	. .venv/bin/activate && python tests/test_api.py
+	. .venv/bin/activate && python3 backend/tests/test_api.py
 
 clean:
 	rm -rf .venv
