@@ -21,6 +21,7 @@ from datetime import datetime
 from dataclasses import dataclass
 from typing import Optional
 
+
 @dataclass
 class PacketData:
     """Class for storing sniffed packets info"""
@@ -71,9 +72,12 @@ icmpv6_types = {
 }
 
 
-# Function for dissecting packet fields
 def dissect_packet(packet, interface: str) -> PacketData:
-    # PacketData object fields
+    """
+    Extracts relevant fields from a Scapy packet and returns a PacketData object
+    """
+    
+    # Initialize local variables to hold extracted packet data
     obj_timestamp = datetime.fromtimestamp(packet.time).strftime("%Y-%m-%d %H:%M:%S")
 
     obj_src_mac = None
@@ -179,13 +183,18 @@ def handle_packet(packet, interface: str, packet_lst: list):
     dissected_packet = dissect_packet(packet, interface)
     protocol_str = dissected_packet.protocol
 
-    # Selecting only protocols from this list or ARP
+    # Append only ARP or packets matching specific protocols to the list
     if ARP in packet or protocol_str in ["udp", "tcp", "icmp", "icmpv6"]:
         packet_lst.append(dissected_packet)
 
 
-# Function to sniff packets on an interface
 def start_sniffer(interface: str) -> list[PacketData]:
+    """
+    Sniffs network traffic on a specific interface using Scapy
+    Stops after capturing 20 packets or after 30 seconds
+    Returns list of dissected PacketData objects
+    """
+
     try:
         packet_lst = []
         sniff(

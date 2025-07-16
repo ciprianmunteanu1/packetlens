@@ -1,28 +1,38 @@
 from sqlalchemy import Column, DateTime, Integer, String
-from db_manager import Base
+from backend.app.database.db_manager import Base
+
 
 class Packet(Base):
+    """
+    SQLAlchemy model for storing network packet data
+    Represents a row in the 'packets' table
+    """
+    
     __tablename__ = "packets"
 
-    # Added primary key id to avoid SQLAlchemy errors
+    # Primary key for the packets table
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     timestamp = Column(DateTime)
 
+    # Ethernet fields
     src_mac = Column(String)
     dst_mac = Column(String)
     eth_type = Column(String)
     interface = Column(String)
 
+    # IP fields
     protocol = Column(String)
     src_ip = Column(String)
     dst_ip = Column(String)
 
+    # TCP/UDP fields
     src_port = Column(Integer)
     dst_port = Column(Integer)
     flags = Column(String)
     payload = Column(String)
 
+    # ICMP fields
     icmp_type = Column(String)
     code = Column(Integer)
 

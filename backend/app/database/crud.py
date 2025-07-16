@@ -1,12 +1,13 @@
 from sqlalchemy.orm import Session
-from models import Packet
+from backend.app.database.models import Packet
 from sqlalchemy import func, and_, or_
 from backend.app.core.sniffer import start_sniffer
 from backend.app.core.threading_manager import collect_packets
 from datetime import datetime
 from typing import Optional, List
 
-# Function to add packets captured on a specific interface to database
+
+# Inserts packets captured from a specific network interface into the database and returns their count
 def add_iface_packets_to_db(session: Session, interface: str) -> int:
     # Add packets to database
     packet_list = start_sniffer(interface)
@@ -36,7 +37,7 @@ def add_iface_packets_to_db(session: Session, interface: str) -> int:
     return count
 
 
-# Function to add packets returned by all threads to database
+# Inserts packets captured concurrently from all interfaces into the database and returns the total count
 def add_all_packets_to_db(session: Session) -> int:
      # Add packets to database
     packet_lists = collect_packets()
@@ -67,7 +68,7 @@ def add_all_packets_to_db(session: Session) -> int:
     return count
     
 
-# Filtering functions
+# Functions for querying packets based on various filters
 def get_all_packets(session: Session) -> List[Packet]:
     results = session.query(Packet).all()
     return results
@@ -175,6 +176,7 @@ def filter_packets(
     return results
 
 
+# Mapping from human-readable TCP flag names to Scapy single-letter codes
 FLAG_MAP = {
     "SYN": "S",
     "ACK": "A",

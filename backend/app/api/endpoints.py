@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Query
 from sqlalchemy.orm import Session
 from backend.app.database.db_manager import engine, get_session
 from backend.app.database import crud, models
-from schemas import PacketOut, AddPacketsResponse, CountResponse, DeleteResponse
-from typing import Optional
+from backend.app.api.schemas import PacketOut, AddPacketsResponse, CountResponse, DeleteResponse
+from typing import List, Optional
+
 
 # Add models to database
 models.Base.metadata.create_all(bind=engine)
@@ -108,7 +109,7 @@ def filter_by_port_range_req(
 
 @app.get("/packets/by_flags", response_model=list[PacketOut])
 def filter_by_flags_req(
-    flags: Optional[list[str]] = None,
+    flags: Optional[List[str]] = Query(None),
     session: Session = Depends(get_session)
 ):
     packets = crud.filter_by_tcp_flags(session, flags)
@@ -162,4 +163,3 @@ def delete_all_packets_req(session: Session = Depends(get_session)):
         message="All packets deleted successfully.",
         rows_deleted=rows_deleted
     )
-

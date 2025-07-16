@@ -2,8 +2,12 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
+
 class PacketOut(BaseModel):
-    """To validate and serialize data"""
+    """
+    Represents the output schema for a captured network packet
+    """
+    
     id: int
     
     timestamp: Optional[datetime] = None
@@ -30,15 +34,27 @@ class PacketOut(BaseModel):
         
 
 class AddPacketsResponse(BaseModel):
+    """
+    Schema for response after adding packets to the database.
+    """
+    
     message: str
     packets_added: int
     
     
 class CountResponse(BaseModel):
+    """
+    Schema for returning the count of packets by protocol
+    """
+    
     protocol: str
     count: int
     
     
 class DeleteResponse(BaseModel):
+    """
+    Schema for response after deleting all packets
+    """
+    
     message: str
     rows_deleted: int
