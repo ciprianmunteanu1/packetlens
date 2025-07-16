@@ -35,7 +35,7 @@ class PacketOut(BaseModel):
 
 class AddPacketsResponse(BaseModel):
     """
-    Schema for response after adding packets to the database.
+    Schema for response after adding packets to the database
     """
     
     message: str
