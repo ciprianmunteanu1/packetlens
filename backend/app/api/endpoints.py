@@ -56,6 +56,7 @@ def filter_by_ip_req(src_ip: Optional[str] = None, dst_ip: Optional[str] = None,
     packets = crud.filter_by_ip(session, src_ip, dst_ip)
     return [PacketOut.model_validate(packet) for packet in packets]
 
+
 @app.get("/packets/by_icmp_type", response_model=list[PacketOut])
 def filter_by_icmp_type_req(icmp_type: Optional[str] = None, session: Session = Depends(get_session)):
     packets = crud.filter_by_icmp_type(session, icmp_type)
@@ -153,7 +154,6 @@ def count_by_protocol_req(
 ):
     count = crud.count_packets_by_protocol(session, protocol)
     return CountResponse(protocol=protocol, count=count)
-
 
 
 @app.delete("/packets", response_model=DeleteResponse)
